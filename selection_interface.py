@@ -13,7 +13,7 @@ class elevatorSettings:
     class SecondaryType(enum.Enum):
         PASSENGER = 1
         FREIGHT = 2
-    _settings = namedtuple("settings", ["floorLimit", "weightLimit", "speedLimit"])
+    _settings = namedtuple("settings", ["abovefloors","belowfloors", "weightLimit", "speedLimit"])
     #Estimates for Floor Limits
     _floorLimit = {PrimaryType.HYDRAULIC:8, PrimaryType.TRACTION:100, 
                    PrimaryType.MACHINE_ROOM_LESS:100, PrimaryType.VACUUM:5, 
@@ -137,7 +137,7 @@ class elevatorSettings:
         print(f"Type: {self._selectedPrimaryType}, Cargo: {self._selectedSecondaryType}, Floors: {total_floors}")
         weight_limit = self._weightLimit[self.PrimaryType[self._selectedPrimaryType]][self.SecondaryType[self._selectedSecondaryType]]
         speed_limit = self._speedLimit[self.PrimaryType[self._selectedPrimaryType]][self.SecondaryType[self._selectedSecondaryType]]
-        self.selectedSettings = self._settings(total_floors, weight_limit, speed_limit)
+        self.selectedSettings = self._settings(above_floors, below_floors, weight_limit, speed_limit)
         self.root.destroy()
     #closes app
     def cancel(self):
