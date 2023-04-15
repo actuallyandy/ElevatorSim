@@ -63,6 +63,8 @@ class requestSimulator:
         floor_requests = self._generateFloorRequests(direction_request, currentFloor,
                                                      self._minFloor, self._maxFloor, 
                                                      num_floor_requests)
+        if currentFloor in floor_requests:
+            floor_requests.remove(currentFloor)
         requestPackage = {direction_request:floor_requests}
         return requestPackage
         
