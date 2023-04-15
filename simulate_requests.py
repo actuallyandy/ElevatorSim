@@ -34,7 +34,7 @@ class requestSimulator:
         if direction == self.Direction.UP:
             avail_floors = [i for i in range(currentFloor, maxFloor) if i!=0]
         else:
-            avail_floors = [i for i in range(minFloor, currentFloor) if i!=0]
+            avail_floors = [i for i in range(-1*minFloor, currentFloor) if i!=0]
         num_avail_floors = len(avail_floors)  
         max_exp = m.log(num_avail_floors+1)
         exponent = rand.uniform(0, max_exp)
@@ -46,7 +46,7 @@ class requestSimulator:
                 if direction == self.Direction.UP:
                     sequence = [i for i in range(currentFloor, upperBound) if i!=0]
                 else:
-                    sequence = [i for i in range(lowerBound, currentFloor) if i!=0]
+                    sequence = [i for i in range(-1*lowerBound, currentFloor) if i!=0]
                 if size > len(sequence):
                     raise ValueError()
                 floorRequests = rand.sample(sequence, size)
@@ -67,6 +67,7 @@ class requestSimulator:
         return requestPackage
         
 if __name__ == "__main__":
+    #Testng Scheme
     req = requestSimulator(15, -5)
     request = req.generateRequest(5)
     print(request)
