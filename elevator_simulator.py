@@ -1,5 +1,3 @@
-from selection_interface import elevatorSettings
-      
 import enum
 import sys
 import selection_interface as si
@@ -7,7 +5,7 @@ import simulate_requests as sr
 import queue
 import time
 from random import choice
-from copy import deepcopy
+
 
 class ElevatorSimulator:
     _floorHeight = 3.28 #meters
