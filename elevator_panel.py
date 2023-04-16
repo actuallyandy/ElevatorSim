@@ -5,6 +5,8 @@ import tkinter as tk
 import math
 from FloorDisplay import FloorDisplay
 from elevatorButton import ElevatorButton
+import time
+import pygame
 class ElevatorPanel:
     _minFloors = 0
     _maxFloors = 1
@@ -18,7 +20,7 @@ class ElevatorPanel:
         self.root.geometry(f"{width}x{height}")
         self._minFloors = minFloors
         self._maxFloors = maxFloors
-        self._floorDisplay = FloorDisplay(self.root, width=100, height=100)
+        self._floorDisplay = FloorDisplay(self.root, width=150, height=100)
         self._floorDisplay.pack(padx=10, pady=10)
         self._floorDisplay.set_number(1)
         self.create_buttons()
@@ -105,6 +107,15 @@ class ElevatorPanel:
     
     def button_callback(self, floor):
         self._floorDisplay.set_number(floor)
+        
+        
+    def bing_bong(self):
+        pygame.init()
+        sound = pygame.mixer.Sound('./sound_effects/bing_bong.mp3')
+        sound.play()
+        while pygame.mixer.get_busy():
+            pygame.time.Clock().tick(5)
+        pygame.quit()
         
 if __name__ == "__main__":
     ep = ElevatorPanel(100, 0)
