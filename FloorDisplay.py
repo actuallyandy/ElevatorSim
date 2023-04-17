@@ -9,7 +9,10 @@ class FloorDisplay(tk.Canvas):
     def draw(self):
         self.delete("all")
         if self.number is not None:
-            text = str(self.number)
+            if self.number < 0:
+                text = f"G{abs(self.number)}"
+            else:
+                text = str(self.number)
             self.text_id = self.create_text(76,51, text=text, fill="red", font=("Arial", 80))
     def set_number(self, number):
         self.number = number
