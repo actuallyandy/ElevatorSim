@@ -1,5 +1,7 @@
 import tkinter as tk
 import time
+#Draws a black box with an input number displayed. It can be updated with set_number method. 
+#Also changes negative numbers to G: -1 -> G1
 class FloorDisplay(tk.Canvas):
     def __init__(self, master, **kwargs):
         super().__init__(master, bg="black", **kwargs)

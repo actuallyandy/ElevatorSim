@@ -20,7 +20,8 @@ class requestSimulator:
     class Direction(enum.Enum):
         UP = 1
         DOWN = 2
-        
+    #Prevents invalid direction requests being generated if on the top or bottom floor.
+    #Can't go down if theres nowhere to go
     def _generateDirectionRequest(self, currentFloor):
         if currentFloor == self._maxFloor:
             return self.Direction.DOWN
@@ -29,7 +30,8 @@ class requestSimulator:
         options = (self.Direction.DOWN, self.Direction.UP)
         return rand.choice(options)
         
-        
+    #Function checkes the number of available floors in current direction. Creates low biased number
+    #of requests. That is if there are twenty floors, it will generate 5 floors more often than 20
     def _generateNumberofFloorRequests(self, direction, currentFloor, minFloor, maxFloor):
         if direction == self.Direction.UP:
             avail_floors = [i for i in range(currentFloor, maxFloor) if i!=0]
@@ -40,6 +42,8 @@ class requestSimulator:
         exponent = rand.uniform(0, max_exp)
         biased_random = int(m.exp(exponent))
         return biased_random
+    #Tries to generate sequence of numbers from current floor to specified bound. It will then
+    #take a random sample to create the floor requests array
     def _generateFloorRequests(self, direction, currentFloor, lowerBound, upperBound, size):
         while True:
             try:
@@ -55,7 +59,13 @@ class requestSimulator:
                 size = size - 1
                 continue
         return floorRequests
-        
+    """
+    Main Logic for Generating a Request when an Elevator hits a new floor
+    -	First the direction is requested
+    -	Second the number of floors is requested
+    -	Third, filter out the current floor (cause pressing 2 when you're on floor 2 is dumb)
+    -	Fourth, package request into dictionary and return it
+    """        
     def generateRequest(self, currentFloor):
         direction_request = self._generateDirectionRequest(currentFloor)
         num_floor_requests = self._generateNumberofFloorRequests(direction_request, currentFloor, 
