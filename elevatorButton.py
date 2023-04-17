@@ -28,6 +28,9 @@ class ElevatorButton(tk.Canvas):
         self.itemconfigure(self.textID, fill='red')
         if self.command:
             self.command()
+    def sim_click(self):
+        self.itemconfigure(self.circleID, outline='red')
+        self.itemconfigure(self.textID, fill='red')
     def resetButton(self):
         self.itemconfigure(self.circleID, outline='black')
         self.itemconfigure(self.textID, fill='black')
