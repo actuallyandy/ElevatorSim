@@ -1,10 +1,8 @@
 import enum
-import sys
-import selection_interface as si
+
 import simulate_requests as sr
 import queue
 import time
-from random import choice
 
 
 class ElevatorSimulator:
@@ -34,7 +32,6 @@ class ElevatorSimulator:
         self._maxSpeed = speedLimit
         self._floorQueue = queue.Queue()
         self._nextFloorQueue = queue.Queue()
-        ## BUILD PANEL HERE
     
     def animate_sleep(self, time_interval, msg):
         time_delta = time_interval/10
@@ -49,7 +46,7 @@ class ElevatorSimulator:
             print(f"\r{msg}{'.'*(i+1)}", end="")
             time.sleep(time_delta)
         
-    def moveElevator(self):
+    def moveElevator(self, externalQueue):
         if self._floorQueue.empty():
             if self._nextFloorQueue.empty():
                 return
@@ -78,6 +75,9 @@ class ElevatorSimulator:
         #print("Moving...")
         #time.sleep(traveltime)
         self._currentFloor = next_floor
+        externalQueue.put(self._currentFloor)
+    
+    def arrivedElevator(self):
         print(f"\nArrived at Destination Floor {self._currentFloor}")
         print("FloorQueue: ", end="")
         for floor in self._floorQueue.queue:
@@ -85,8 +85,8 @@ class ElevatorSimulator:
         print("\n")
         self.animate_sleep(10, "Door Closing")
         print("\n")
+    
         
-        #Maybe check requests here to see if it should ignore generating another request
         
     def adjustFloorQueue(self):
         temp_list = [self._floorQueue.get() for _ in range(self._floorQueue.qsize())]
@@ -109,7 +109,7 @@ class ElevatorSimulator:
         for floor in unique_next_list:
             self._nextFloorQueue.put(floor)
         
-    def generateRequest(self):
+    def generateRequest(self, externalQueue):
         request = self.requestSimulator.generateRequest(self._currentFloor)
         request_direction = list(request.keys())
         request_floors = list(request.values())
@@ -124,8 +124,8 @@ class ElevatorSimulator:
         if self._direction is None:
             print(f"Elevator is stationary. Moving: {request_direction}")
             self._direction = request_direction
-        
         for floor in request_floors:
+            externalQueue.put(floor)
             if self._direction == self.Direction.UP:
                 #print("Going Up!")
                 if floor < self._currentFloor:
@@ -144,28 +144,14 @@ class ElevatorSimulator:
                     self._floorQueue.put(floor)
         self.adjustFloorQueue()
     
-    def initializeRequestSimulator(self):
+    def initializeSimulator(self):
         self.requestSimulator = sr.requestSimulator(self._maxFloor, self._minFloor)
         
         
+
         
-if __name__ == "__main__":
-    print("Running Elevator Simulator")
-    elevator_settings = si.elevatorSettings()
-    simSettings = elevator_settings.selectedSettings
-    if simSettings is None:
-        sys.exit()
-    sim = ElevatorSimulator(simSettings.abovefloors, simSettings.belowfloors,
-                            simSettings.weightLimit, simSettings.speedLimit)
-    sim.initializeRequestSimulator()
-    while True:
-        #Coin flip that decides whether request is created
-        if choice([True, False]):
-            sim.generateRequest()
-        else:
-            print("Elevator Waiting.")
-            time.sleep(5) #Elevator Waiting
-        sim.moveElevator()
+    
+    
     
     
         

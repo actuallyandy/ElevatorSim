@@ -7,23 +7,39 @@ from FloorDisplay import FloorDisplay
 from elevatorButton import ElevatorButton
 import time
 import pygame
+
+from random import choice
+import threading
+import queue
+import sys
+import selection_interface as si
+from elevator_simulator import ElevatorSimulator
+
+
 class ElevatorPanel:
     _minFloors = 0
     _maxFloors = 1
     _currentFloor = 1
     _buttonDict = {}
-    def __init__(self, maxFloors, minFloors):
+    flag = True
+    def __init__(self, simSettings):
         self.root = tk.Tk()
         self.root.title("Elevator")
+        self._minFloors = simSettings.belowfloors
+        self._maxFloors = simSettings.abovefloors
         width = self.root.winfo_width() + 220
-        height = self.root.winfo_height() + (45 * math.ceil((maxFloors+minFloors)/2)) +120
+        height = self.root.winfo_height() + (45 * math.ceil((self._maxFloors+self._minFloors)/2)) +120
         self.root.geometry(f"{width}x{height}")
-        self._minFloors = minFloors
-        self._maxFloors = maxFloors
+        
         self._floorDisplay = FloorDisplay(self.root, width=150, height=100)
         self._floorDisplay.pack(padx=10, pady=10)
         self._floorDisplay.set_number(1)
         self.create_buttons()
+        ##Start Simulator
+        self.buttonQueue = queue.Queue()
+        self.currentfloorQueue = queue.Queue()
+        self._simID = threading.Thread(target=self.runSimulator, args=(simSettings, self.buttonQueue, self.currentfloorQueue))
+        self._simID.start()
         self.root.mainloop()
     
     def getFloorText(self, num):
@@ -117,5 +133,56 @@ class ElevatorPanel:
             pygame.time.Clock().tick(5)
         pygame.quit()
         
+    def simulateButtonPress(self):
+        while not self.buttonQueue.empty():
+            buttonID = self.buttonQueue.get()
+            button = self._buttonDict[buttonID]
+            button.sim_click()
+        
+    def simulateMoveElevator(self):
+        while not self.currentfloorQueue.empty():
+            floorID = self.currentfloorQueue.get()
+            self._floorDisplay.set_number(floorID)
+            self._currentFloor = floorID
+            button = self._buttonDict[floorID]
+            button.resetButton()
+            
+    
+    #### MAIN CODE
+    def runSimulator(self, simSettings, buttonQueue, currentfloorQueue):
+        sim = ElevatorSimulator(simSettings.abovefloors, simSettings.belowfloors,
+                                simSettings.weightLimit, simSettings.speedLimit)
+        sim.initializeSimulator()
+        while True:
+            #Coin flip that decides whether request is created
+            if choice([True, False]):
+                sim.generateRequest(buttonQueue)
+            else:
+                print("Elevator Waiting.")
+                time.sleep(5) #Elevator Waiting
+            self.simulateButtonPress()
+            sim.moveElevator(currentfloorQueue)
+            old_floor = self._currentFloor
+            self.simulateMoveElevator()
+            new_floor = self._currentFloor
+            if old_floor != new_floor:
+                t = threading.Thread(target=self.bing_bong())
+                t.start()
+                t.join()
+            sim.arrivedElevator()
+            
+        
 if __name__ == "__main__":
-    ep = ElevatorPanel(100, 0)
+    print("Running Elevator Simulator")
+    elevator_settings = si.elevatorSettings()
+    simSettings = elevator_settings.selectedSettings
+    if simSettings is None:
+        sys.exit()
+    elevator = ElevatorPanel(simSettings)
+    threads = threading.enumerate()
+    for thread in threads:
+        if thread != threading.main_thread():
+            thread.join()
+    
+    raise SystemExit
+    
