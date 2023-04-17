@@ -40,6 +40,7 @@ class ElevatorPanel:
         self.currentfloorQueue = queue.Queue()
         self._simID = threading.Thread(target=self.runSimulator, args=(simSettings, self.buttonQueue, self.currentfloorQueue))
         self._simID.start()
+        self.root.protocol("WM_DELETE_WINDOW", self.stop_threads)
         self.root.mainloop()
     
     def getFloorText(self, num):
@@ -147,7 +148,10 @@ class ElevatorPanel:
             button = self._buttonDict[floorID]
             button.resetButton()
             
-    
+    def stop_threads(self):
+        #print("\nTrying to stop thread")
+        self._simID.do_run = False
+        self.root.destroy()
     #### MAIN CODE
     def runSimulator(self, simSettings, buttonQueue, currentfloorQueue):
         sim = ElevatorSimulator(simSettings.abovefloors, simSettings.belowfloors,
@@ -179,10 +183,6 @@ if __name__ == "__main__":
     if simSettings is None:
         sys.exit()
     elevator = ElevatorPanel(simSettings)
-    threads = threading.enumerate()
-    for thread in threads:
-        if thread != threading.main_thread():
-            thread.join()
     
     raise SystemExit
     
